@@ -94,7 +94,6 @@ void OpenInterface::handleOpCode(byte oc)
 
      case(OC_PAUSE_RESUME_STREAM):
      break;
-
      case(OC_SEND_IR):
        callCallbackWithOneByte(sendIrCallback);
      break;
@@ -132,7 +131,6 @@ void OpenInterface::handleOpCode(byte oc)
      case(OC_WAIT_TIME):
        waitTime();
      break;
-
      case(OC_DEMO):
      case(OC_SPOT):
      case(OC_COVER):
@@ -229,7 +227,7 @@ bool OpenInterface::readByte(uint8_t* byteIn)
  */
 bool OpenInterface::isDoublePacket(uint8_t packet)
 {
-  uint8_t max, doublePackets[] = {19,20,22,23,25,26,27,28,29,30,31,33,39,40,41,42};
+  uint8_t max, doublePackets[] = {19,20,22,23,25,26,27,28,29,30,31,33,39,40,41,42,43,44,46,47,48,49,50,51,54,55,56,57};
   max = sizeof(doublePackets);
   for(int i=0; i<max; i++)
   {
@@ -355,6 +353,23 @@ void OpenInterface::updateBatteryTemperature(uint8_t temperature)
 }
 
 /**
+ * Helper function to set analog input information for sensor return (gyro for turtlebot)
+ */
+void OpenInterface::updateAnalogInput(int voltage)
+{
+  sensorInt[OI_USER_ANALOG_INPUT] = voltage;
+}
+
+/**
+ * Helper function to set encoder counts return
+ */
+void OpenInterface::updateEncoderCounts(int left, int right)
+{
+  sensorInt[OI_ENCODER_COUNTS_LEFT] = left;
+  sensorInt[OI_ENCODER_COUNTS_RIGHT] = right;
+}
+
+/**
  * Set a value of a sensor ready for return to the controller
  */
 void OpenInterface::setSensorValue(uint8_t sensorKey, uint8_t sensorValue)
@@ -454,6 +469,30 @@ void OpenInterface::getSensors()
         pStart    = 7;
         pStop     = 42;
         sensorLen = 52;
+      break;
+
+      case(PACKET_GRP_7_58):
+        pStart    = 7;
+        pStop     = 58;
+        sensorLen = 80;
+      break;
+
+      case(PACKET_GRP_43_58):
+        pStart    = 43;
+        pStop     = 58;
+        sensorLen = 28;
+      break;
+
+      case(PACKET_GRP_46_51):
+        pStart    = 46;
+        pStop     = 51;
+        sensorLen = 12;
+      break;
+
+      case(PACKET_GRP_54_58):
+        pStart    = 54;
+        pStop     = 58;
+        sensorLen = 9;
       break;
 
       default:
