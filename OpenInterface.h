@@ -79,31 +79,31 @@
 
 // Sensors
 #define OI_SENSOR_WHEELDROPS_BUMPS  7   //7 _x.bumps_wheeldrops
-//8 _x.wall
-//9 _x.cliff_left, 
-//10 _x.cliff_front_left, 
-//11 _x.cliff_front_right, 
-//12 _x.cliff_right, 
+#define OI_WALL                     8   //8 _x.wall
+#define OI_CLIFF_LEFT               9   //9 _x.cliff_left,
+#define OI_CLIFF_FRONT_LEFT         10  //10 _x.cliff_front_left,
+#define OI_CLIFF_FRONT_RIGHT        11  //11 _x.cliff_front_right,
+#define OI_CLIFF_RIGHT              12  //12 _x.cliff_right,
 //13 _x.virtual_wall, 
-//14 _x.motor_overcurrents, 
-//15 _x.dirt_detector_left, 
-//16 _x.dirt_detector_right,
-#define OI_SENSOR_IR                17   //17 _x.remote_opcode, 
+#define OI_MOTOR_OVERCURRENTS       14  //14 _x.motor_overcurrents,
+#define OI_DIRT_DETECTOR_LEFT       15  //15 _x.dirt_detector_left,
+#define OI_DIRT_DETECTOR_RIGHT      16  //16 _x.dirt_detector_right,
+#define OI_SENSOR_IR                17  //17 _x.remote_opcode,
 //18 _x.buttons, 
-//19 _x.distance, 
-//20 _x.angle, 
+#define OI_DISTANCE                 19  //19 _x.distance,
+#define OI_ANGLE                    20  //20 _x.angle,
 //21 _x.charging_state,
 #define OI_SENSOR_BAT_VOLTAGE       22  // 22 _x.voltage
 #define OI_SENSOR_BAT_CURRENT       23  //23 _x.current
 #define OI_SENSOR_BAT_TEMPERATURE   24  //24 _x.temperature
 #define OI_SENSOR_BAT_CHARGE        25  //25 _x.charge
 #define OI_SENSOR_BAT_CHARGE_REMAIN 26  //26 _x.capacity
-//27 _x.wall_signal, 
-//28 _x.cliff_left_signal, 
-//29_x.cliff_front_left_signal, 
-//30 _x.cliff_front_right_signal, 
-//31 _x.cliff_right_signal, 
-//32 _x.user_digital_inputs, 
+#define OI_WALL_SIGNAL              27  //27 _x.wall_signal,
+#define OI_CLIFF_LEFT_SIGNAL        28  //28 _x.cliff_left_signal,
+#define OI_CLIFF_FRONT_LEFT_SIGNAL  29  //29_x.cliff_front_left_signal,
+#define OI_CLIFF_FRONT_RIGHT_SIGNAL 30  //30 _x.cliff_front_right_signal,
+#define OI_CLIFF_RIGHT_SIGNAL       31  //31 _x.cliff_right_signal,
+#define OI_USER_DIGITAL_INPUTS      32  //32 _x.user_digital_inputs,
 #define OI_USER_ANALOG_INPUT        33  //33 _x.user_analog_input, 
 //34 _x.charging_sources_available
 #define OI_SENSOR_OI_MODE           35  // 35 _x.oi_mode
@@ -141,6 +141,37 @@
 #define OI_MASK_DROP_LEFT   8
 #define OI_MASK_DROP_CASTER 16
 
+// REMOTE_OPCODES Remote control.
+#define OP_LEFT    129 //: 'left',
+#define OP_FORWARD    130 //: 'forward',
+#define OP_RIGHT    131 //: 'right',
+//#define OP_    132 //: 'spot',
+//#define OP_    133 //: 'max',
+//#define OP_    134 //: 'small',
+//#define OP_    135 //: 'medium',
+//#define OP_    136 //: 'large',
+//#define OP_    136 //: 'clean',
+//#define OP_    137 //: 'pause',
+//#define OP_    138 //: 'power',
+//#define OP_    139 //: 'arc-left',
+//#define OP_   140 //: 'arc-right',
+#define OP_STOP    141 //: 'drive-stop',
+//# Scheduling remote.
+//#define OP_    142 //: 'send-all',
+//#define OP_    143 //: 'seek-dock',
+//    # Home base.
+//#define OP_    240 //: 'reserved',
+//#define OP_    242 //: 'force-field',
+//#define OP_    244 //: 'green-buoy',
+//#define OP_    246 //: 'green-buoy-and-force-field',
+//#define OP_    248 //: 'red-buoy',
+//#define OP_    250 //: 'red-buoy-and-force-field',
+//#define OP_    252 //: 'red-buoy-and-green-buoy',
+//#define OP_    254 //: 'red-buoy-and-green-buoy-and-force-field',
+//#define OP_    255 //: 'none',
+
+
+
 // Other stuff
 #define READ_TIMEOUT 1000
 
@@ -176,6 +207,7 @@ private:
   /**
    * Callbacks
    */
+  callbackWithTwoInts    drivePWMCallback; //OC_DRIVE_PWM
   callbackWithTwoInts    driveDirectCallback;
   callbackWithTwoInts    driveCallback;
   callbackWithByteArr    songCallback;
@@ -209,6 +241,8 @@ private:
   void drive();
 
   void driveDirect();
+
+  void drivePWM();
 
   void waitAction(callbackWithOneInt);
 
@@ -245,6 +279,7 @@ public:
   /**
    * Register callbacks for user implemented features
    */
+  void registerDrivePWM(callbackWithTwoInts f) {drivePWMCallback = f;}
   void registerDriveDirect(callbackWithTwoInts f) {driveDirectCallback = f;}
   void registerDrive(callbackWithTwoInts f) {driveCallback = f;}
   void registerSong(callbackWithByteArr f) {songCallback = f;}
@@ -261,6 +296,7 @@ public:
    */
   void setSensorValue(uint8_t, uint8_t);
   void setSensorValue(uint8_t, int);
+  int  getSensorValue(uint8_t);
 
   /**
    * Battery sensor information

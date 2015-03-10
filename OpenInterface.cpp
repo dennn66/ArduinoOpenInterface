@@ -166,12 +166,19 @@ void OpenInterface::handleOpCode(byte oc)
        songPlay();
      break;
 
+     case (OC_DRIVE_PWM):
+      if(sensor[OI_SENSOR_OI_MODE] == OI_MODE_SAFE ||
+              sensor[OI_SENSOR_OI_MODE] == OI_MODE_FULL)       drivePWM();
+     break;
+
      case (OC_DIRECT_DRIVE):
-       driveDirect();
+       if(sensor[OI_SENSOR_OI_MODE] == OI_MODE_SAFE ||
+               sensor[OI_SENSOR_OI_MODE] == OI_MODE_FULL) driveDirect();
      break;
 
      case (OC_DRIVE):
-       drive();
+      if(sensor[OI_SENSOR_OI_MODE] == OI_MODE_SAFE ||
+              sensor[OI_SENSOR_OI_MODE] == OI_MODE_FULL)       drive();
      break;
 
      case (OC_FULL):
@@ -386,6 +393,18 @@ void OpenInterface::setSensorValue(uint8_t sensorKey, int sensorValue)
 }
 
 /**
+ * Get a value of a sensor
+ */
+int OpenInterface::getSensorValue(uint8_t sensorKey)
+{
+  if(isDoublePacket(sensorKey)){
+      return(sensorInt[sensorKey]);
+  } else {
+      return((int)sensor[sensorKey]);
+  }
+}
+
+/**
  * ************ Handle Op Codes ****************
  */
 
@@ -425,7 +444,7 @@ void OpenInterface::getSensors()
     char strId[3];
     readBytes(id, 1);
 #ifdef DEBUG_SERIAL
-    id[0] = PACKET_GRP_7_42;
+    id[0] = PACKET_GRP_7_58;
 #endif
     switch (id[0])
     {
@@ -438,7 +457,7 @@ void OpenInterface::getSensors()
       case (PACKET_GRP_7_16):
         pStart    = 7;
         pStop     = 16;
-        sensorLen = 16;
+        sensorLen = 10;
       break;
 
       case (PACKET_GRP_17_20):
@@ -775,7 +794,22 @@ void OpenInterface::drive()
 void OpenInterface::driveDirect()
 {
   uint8_t raw[4];
+#ifdef DEBUG_SERIAL
+  serial->println("driveDirect");
+#endif
   bool result = readBytes(raw, 4);
+#ifdef DEBUG_SERIAL
+        raw[0] = 0;
+        raw[2] = 0;
+        raw[3] = 200;
+        raw[1] = 100;
+        result = 1;
+        serial->print(result);
+        serial->print(" Left ");
+        serial->print(int(word(raw[0], raw[1])), DEC);
+        serial->print(" Right ");
+        serial->println(int(word(raw[2], raw[3])), DEC);
+#endif
 
   if (result)
   {
@@ -785,7 +819,26 @@ void OpenInterface::driveDirect()
     sensorInt[OI_SENSOR_REQ_VEL]       = 0;
     if (driveDirectCallback)
     {
+#ifdef DEBUG_SERIAL
+      serial->println("driveDirectCallback");
+#endif
       (*driveDirectCallback)(sensorInt[OI_SENSOR_REQ_LEFT_VEL], sensorInt[OI_SENSOR_REQ_RIGHT_VEL]);
+    }
+  }
+}
+void OpenInterface::drivePWM()
+{
+  uint8_t raw[4];
+  bool result = readBytes(raw, 4);
+
+  if (result)
+  {
+    if (drivePWMCallback)
+    {
+#ifdef DEBUG_SERIAL
+      serial->println("drivePWMCallback");
+#endif
+      (*drivePWMCallback)(int(word(raw[2], raw[3])), int(word(raw[0], raw[1])));
     }
   }
 }
